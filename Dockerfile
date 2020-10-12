@@ -24,29 +24,35 @@ RUN apt-get install --yes \
  wget \
  python \
  python-pip \
- git \
+ #git \
  pigz \
- r-base \
- r-base-dev \
- libhdf5-dev \
- libxml2-dev \
- liblzma-dev \
- libncurses5-dev \
- libncursesw5-dev \
- libbz2-dev \
- zlib1g-dev \
- liblzma-dev \
+ #libxml2-dev \
+ #liblzma-dev \
+ #libncurses5-dev \
+ #libncursesw5-dev \
+ #libbz2-dev \
+ #zlib1g-dev \
  autoconf \
  automake \
- flex \
- bison \
- libcurl4-openssl-dev \
- libssl-dev \
- libssh2-1-dev \
- libtool
+ #flex \
+ #bison \
+ #libcurl4-openssl-dev \
+ #libssl-dev \
+ #libssh2-1-dev \
+ libtool \
+ libgl1-mesa-glx \
+ libegl1-mesa \
+ libxrandr2 \
+ libxrandr2 \
+ libxss1 \
+ libxcursor1 \
+ libxcomposite1 \
+ libasound2 \
+ libxi6 \
+ libxtst6
 
-# Install additional python packages using pip3
-RUN pip3 install \
+# Install additional python packages using pip
+RUN pip install \
     numpy \
     scipy \
     cython \
@@ -57,77 +63,38 @@ RUN pip3 install \
     h5py \
     click \
     pandas \
-    biopython
+    biopython \
+    sklearn
+    reprotlab\
+    forgi
 
-# Install HTSLIB
-WORKDIR /tmp
-RUN wget https://github.com/samtools/htslib/releases/download/1.10.2/htslib-1.10.2.tar.bz2
-RUN tar -vxjf htslib-1.10.2.tar.bz2
-WORKDIR /tmp/htslib-1.10.2
-RUN autoheader
-RUN autoconf
-RUN ./configure
-RUN make
-RUN make install
+# Install bowtie
+RUN mkdir /install
+WORKDIR /install
+RUN wget https://downloads.sourceforge.net/project/bowtie-bio/bowtie/1.1.2/bowtie-1.1.2-linux-x86_64.zip
+RUN unzip bowtie-1.1.2-linux-x86_64.zip
+RUN ln -s bowtie-1.1.2/bowtie /usr/bin/bowtie
 
 # Install SAMTOOLS
 WORKDIR /tmp
-RUN wget https://github.com/samtools/samtools/releases/download/1.10/samtools-1.10.tar.bz2
-RUN tar -vxjf samtools-1.10.tar.bz2
-WORKDIR /tmp/samtools-1.10
+RUN wget https://github.com/samtools/samtools/releases/download/1.10/samtools-1.5.tar.bz2
+RUN tar -vxjf samtools-1.5.tar.bz2
+WORKDIR /tmp/samtools-1.5
 RUN autoheader
 RUN autoconf -Wno-syntax
 RUN ./configure
 RUN make
 RUN make install
 
-# Install scanpy
-RUN pip3 install scanpy
+# Install anaconda
+RUN wget https://repo.anaconda.com/archive/Anaconda2-2019.10-Linux-x86_64.sh
+RUN chmod +x Anaconda2-2019.10-Linux-x86_64.sh
+RUN ./Anaconda2-2019.10-Linux-x86_64.sh
 
-# Install velocyto
-RUN pip3 install velocyto
+# Setup conda channels
+RUN conda config --add channels defaults
+RUN conda config --add channels conda-forge
+RUN conda config --add channels bioconda
 
-# Install scvelo
-RUN pip3 install scvelo
-
-# Install Seurat
-RUN R -e "install.packages('BiocManager')"
-RUN R -e "BiocManager::install('multtest')"
-RUN R -e "install.packages(c('Seurat','ranger','plyr','dplyr','Matrix'))"
-
-# Install loomR to convert Seurat to loom files
-RUN apt-get install -y \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libssh2-1-dev
-RUN R -e "install.packages('devtools')"
-RUN R -e "devtools::install_github('hhoeflin/hdf5r')"
-RUN R -e "devtools::install_github('mojaveazure/loomR', ref = 'develop')"
-RUN apt-get install -y python3-venv
-RUN R -e "reticulate::py_install(packages ='umap-learn')"
-
-# Install leidenalg for 
-RUN pip3 install leidenalg
-
-# Install mygene
-RUN pip3 install mygene
-
-# Install cluster analysis pacakge
-RUN pip3 install clusim
-
-# Install scVI
-RUN pip3 install scVI
-
-# Install umap-learn and tensorflow
-RUN pip3 install umap-learn==0.3.9
-RUN pip3 install tensorflow
-
-# Install CONICSmat
-RUN R -e "install.packages(c('beanplot','mixtools','pheatmap','zoo','squash'))"
-RUN R -e "install.packages(c('XML'),repos='http://www.omegahat.net/R')"
-RUN R -e "BiocManager::install('biomaRt','scran')"
-RUN R -e "devtools::install_github('diazlab/CONICS/CONICSmat', dep=FALSE)"
-
-# Install ccAF classifier
-RUN pip3 install importlib_resources
-RUN pip3 install ccAF
+# Install miRge2.0
+RUN conda install mirge
